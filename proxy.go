@@ -2,8 +2,8 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -11,7 +11,12 @@ import (
 // NewProxy 启动代理服务
 func NewProxy(url string, localPort string) {
 	r := gin.Default()
-	r.Any("", func(c *gin.Context) {
+	r.Any("/*path", proxy(url))
+	r.Run("0.0.0.0:" + localPort)
+}
+
+func proxy(url string) func(c *gin.Context) {
+	return func(c *gin.Context) {
 		// 读取请求头
 		headers := make(map[string]string)
 		for k, v := range c.Request.Header {
@@ -50,8 +55,7 @@ func NewProxy(url string, localPort string) {
 				})
 			}
 		}
-	})
-	r.Run("0.0.0.0:" + localPort)
+	}
 }
 
 func SendRequest(method string, url string, headers map[string]string, body []byte) (*http.Response, error) {
@@ -64,7 +68,8 @@ func SendRequest(method string, url string, headers map[string]string, body []by
 	for k, v := range headers {
 		req.Header.Set(k, v)
 	}
-	fmt.Println(req.Header)
+	log.Println(req.Header)
+	log.Println(url)
 	// 发送请求
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
