@@ -1,4 +1,4 @@
-module simple-proxy
+module gproxy
 
 go 1.20
 
