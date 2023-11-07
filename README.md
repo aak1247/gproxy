@@ -1,7 +1,45 @@
-# Usage
+# gproxy
 
-代理访问单个域名的全部请求 Proxy all requests to a website
+| English | [简体中文](./README.zh-CN.md) |
 
-``gproxy http://example.com/ -p 8080``
+## Usage
 
-这样就可以启动一个代理进程，在本地的8080端口代理example.com的内容。 then, a simple http server will run on local 8080 port to serve the content of example.com
+### Arguments
+
+gproxy [-m mode] [-p port] targetURL
+
+- ``mode``: http or tcp
+- ``port``: local port, example: 8080
+
+### Proxy a http website:
+
+``gproxy -m http -p 8080 http://github.com/``
+
+then, a simple http server will run on local 8080 port to serve the content of github.com
+
+### Proxy a tcp service:
+
+``gproxy -m tcp -p 2333 github.com:443``
+
+then, all tcp request to localhost:2333 will be sent to github.com:443 and response from github.com:443 will be sent
+back to client
+
+## Build
+
+### With makefile
+
+``make release``: will generate all linux/windows/osx binary
+
+### Run by command
+
+#### Target linux
+
+``CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -o gproxy-linux-amd64``
+
+#### Target windows
+
+``CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o gproxy-windows-amd64.exe``
+
+#### Target mac
+
+``CGO_ENABLED=0 GOOS=darwin  GOARCH=amd64 go build -o gproxy-darwin-amd64``
