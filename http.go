@@ -5,17 +5,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
-// NewProxy 启动代理服务
-func NewProxy(url string, localPort string) {
+// NewHttpProxy 启动代理服务
+func NewHttpProxy(url string, localPort int) {
 	r := gin.Default()
-	r.Any("/*path", proxy(url))
-	r.Run("0.0.0.0:" + localPort)
+	r.Any("/*path", httpProxy(url))
+	r.Run("0.0.0.0:" + strconv.Itoa(localPort))
 }
 
-func proxy(url string) func(c *gin.Context) {
+func httpProxy(url string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		// 读取请求头
 		headers := make(map[string]string)
