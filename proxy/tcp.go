@@ -1,4 +1,4 @@
-package main
+package proxy
 
 import (
 	"io"
@@ -52,15 +52,15 @@ func tcpProxy(url string, client net.Conn) error {
 				n, err := client.Read(buf)
 				if err != nil {
 					if err != io.EOF {
-						log.Printf("Failed to read from client: %v, close connection\n", err)
+						log.Printf("Failed to read from WSClient: %v, close connection\n", err)
 						cs <- true
 						ss <- true
 						return
 					}
 				}
 				if n > 0 {
-					log.Printf("received from client bytes %d\n", n)
-					log.Printf("Received data from client %s: %s\n", client.RemoteAddr().String(), string(buf[:n]))
+					log.Printf("received from WSClient bytes %d\n", n)
+					log.Printf("Received data from WSClient %s: %s\n", client.RemoteAddr().String(), string(buf[:n]))
 
 					// write to server
 					if n, err := server.Write(buf); err != nil {
@@ -101,11 +101,11 @@ func tcpProxy(url string, client net.Conn) error {
 					log.Printf("received from server bytes %d\n", n)
 					log.Printf("Received data from server %s: %s\n", server.RemoteAddr().String(), string(buf[:n]))
 
-					// write to client
+					// write to WSClient
 					if n, err := client.Write(buf); err != nil {
-						log.Println("Failed to write to client:", err)
+						log.Println("Failed to write to WSClient:", err)
 					} else {
-						log.Printf("write to client %d", n)
+						log.Printf("write to WSClient %d", n)
 					}
 					// 清空缓冲区
 					buf = make([]byte, 1024*256)

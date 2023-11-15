@@ -1,13 +1,14 @@
 package main
 
 import (
+	"gproxy/proxy"
 	"log"
 	"os"
 	"strconv"
 )
 
 func main() {
-	// 解析命令行参数（httpProxy domain [-p port]）
+	// 解析命令行参数（gproxy [-p port] [-m mode] domain）
 	args := os.Args[1:]
 	if len(args) < 1 {
 		panic("invalid args")
@@ -35,8 +36,10 @@ func main() {
 	switch mode {
 	case "http":
 		// 启动HTTP代理服务
-		NewHttpProxy(domain, port)
+		proxy.NewHttpProxy(domain, port)
 	case "tcp":
-		NewTcpProxy(domain, port)
+		proxy.NewTcpProxy(domain, port)
+	case "ws":
+		proxy.NewWSProxy(domain, port)
 	}
 }
