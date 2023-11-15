@@ -24,6 +24,12 @@ then, a simple http server will run on local 8080 port to serve the content of g
 then, all tcp request to localhost:2333 will be sent to github.com:443 and response from github.com:443 will be sent
 back to client
 
+### Proxy a websocket service:
+
+``gproxy -m ws -p 8081 ws://abc.com``
+
+then, a websocket server will run on port 8081 and proxy all ws requests to abc.com. All path and query will be kept and sent to `abc.com`
+
 ## Build
 
 ### With makefile
