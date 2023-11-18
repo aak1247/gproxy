@@ -17,6 +17,8 @@ func main() {
 	var err error
 	port := 80
 	mode := "http"
+	cert := ""
+	key := ""
 	for i, arg := range args {
 		if arg == "-p" && len(args) > i+1 {
 			port, err = strconv.Atoi(args[i+1])
@@ -31,15 +33,30 @@ func main() {
 			i++
 			continue
 		}
+		if arg == "--key" && len(args) > i+1 {
+			key = args[i+1]
+			i++
+			continue
+		}
+		if arg == "--cert" && len(args) > i+1 {
+			cert = args[i+1]
+			i++
+			continue
+		}
 		domain = arg
 	}
 	switch mode {
 	case "http":
 		// 启动HTTP代理服务
 		proxy.NewHttpProxy(domain, port)
+	case "https":
+		// 启动HTTPS代理服务
+		proxy.NewHttpsProxy(domain, port, cert, key)
 	case "tcp":
 		proxy.NewTcpProxy(domain, port)
 	case "ws":
 		proxy.NewWSProxy(domain, port)
+	case "wss":
+		proxy.NewWSSProxy(domain, port, cert, key)
 	}
 }

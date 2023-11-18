@@ -11,13 +11,21 @@ import (
 
 func NewWSProxy(url string, localPort int) {
 	//http.Handle("/proxyWsConn", )
-	http.HandleFunc("/", newWsProxy(url))
+	http.HandleFunc("/", wsProxyUrl(url))
 	if err := http.ListenAndServe(":"+strconv.Itoa(localPort), nil); err != nil {
 		log.Fatalf("failed to start ws server\n")
 	}
 }
 
-func newWsProxy(url string) func(http.ResponseWriter, *http.Request) {
+func NewWSSProxy(url string, localPort int, cert, key string) {
+	//http.Handle("/proxyWsConn", )
+	http.HandleFunc("/", wsProxyUrl(url))
+	if err := http.ListenAndServeTLS(":"+strconv.Itoa(localPort), cert, key, nil); err != nil {
+		log.Fatalf("failed to start ws server\n")
+	}
+}
+
+func wsProxyUrl(url string) func(http.ResponseWriter, *http.Request) {
 	return func(writer http.ResponseWriter, request *http.Request) {
 		if ws2.IsWebSocketUpgrade(request) {
 			conn := initWSConn(writer, request)
@@ -34,8 +42,6 @@ func newWsProxy(url string) func(http.ResponseWriter, *http.Request) {
 				targetUrl += "?" + requestUrl.RawQuery
 			}
 			proxyWsConn(conn, targetUrl, header)
-
-			// 代理访问
 		} else {
 			writer.Write([]byte("ok"))
 		}
