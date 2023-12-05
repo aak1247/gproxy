@@ -16,6 +16,12 @@ func NewHttpProxy(url string, localPort int) {
 	r.Run("0.0.0.0:" + strconv.Itoa(localPort))
 }
 
+func NewHttpsProxy(url string, localPort int, cert, key string) {
+	r := gin.Default()
+	r.Any("/*path", httpProxy(url))
+	r.RunTLS("0.0.0.0:"+strconv.Itoa(localPort), cert, key)
+}
+
 func httpProxy(url string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		// 读取请求头

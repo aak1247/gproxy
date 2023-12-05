@@ -17,6 +17,10 @@ gproxy [-m mode] [-p port] targetURL
 
 then, a simple http server will run on local 8080 port to serve the content of github.com
 
+#### HTTPS
+
+``gproxy -m https --key keyPath --cert certPath -p 8080 http://github.com/``
+
 ### Proxy a tcp service:
 
 ``gproxy -m tcp -p 2333 github.com:443``
@@ -29,6 +33,10 @@ back to client
 ``gproxy -m ws -p 8081 ws://abc.com``
 
 then, a websocket server will run on port 8081 and proxy all ws requests to abc.com. All path and query will be kept and sent to `abc.com`
+
+#### WSS
+
+``gproxy -m wss --key keyPath --cert certPath -p 8081 ws://abc.com``
 
 ## Build
 
