@@ -13,7 +13,7 @@ func NewWSProxy(url string, localPort int) {
 	//http.Handle("/proxyWsConn", )
 	http.HandleFunc("/", wsProxyUrl(url))
 	if err := http.ListenAndServe(":"+strconv.Itoa(localPort), nil); err != nil {
-		log.Fatalf("failed to start ws server\n")
+		log.Fatalf("failed to start ws server %v\n", err)
 	}
 }
 
@@ -21,7 +21,7 @@ func NewWSSProxy(url string, localPort int, cert, key string) {
 	//http.Handle("/proxyWsConn", )
 	http.HandleFunc("/", wsProxyUrl(url))
 	if err := http.ListenAndServeTLS(":"+strconv.Itoa(localPort), cert, key, nil); err != nil {
-		log.Fatalf("failed to start ws server\n")
+		log.Fatalf("failed to start ws server %v\n", err)
 	}
 }
 
