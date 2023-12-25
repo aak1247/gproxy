@@ -42,7 +42,7 @@ then, a websocket server will run on port 8081 and proxy all ws requests to abc.
 
 ### With makefile
 
-``make release``: will generate all linux/windows/osx binary
+``make release VERSION=$VERSION``: will generate all linux/windows/osx binary
 
 ### Run by command
 
