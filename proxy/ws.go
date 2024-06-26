@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"fmt"
 	ws2 "github.com/gorilla/websocket"
 	"log"
 	"net/http"
@@ -31,6 +30,15 @@ func wsProxyUrl(url string) func(http.ResponseWriter, *http.Request) {
 			conn := initWSConn(writer, request)
 			// 拿到所有的header和参数
 			header := request.Header
+			// 覆盖请求头
+			header["Host"] = []string{GetDomain(url)}
+			if Anonymous {
+				// 删除请求源信息
+				header["X-Real-Ip"] = []string{RealIP}
+				delete(header, "X-Forwarded-For")
+				header["User-Agent"] = []string{UserAgent}
+				delete(header, "Referer")
+			}
 			requestUrl := request.URL
 			log.Printf("header %v", header)
 			log.Printf("url %v", requestUrl)
@@ -69,7 +77,7 @@ func proxyWsConn(ws *ws2.Conn, url string, headers http.Header) {
 	defer func() {
 		f := recover()
 		if f != nil {
-			fmt.Printf("fatal error %v\n", f)
+			log.Printf("fatal error %v\n", f)
 		}
 	}()
 	// WSClient init
@@ -86,7 +94,7 @@ func proxyWsConn(ws *ws2.Conn, url string, headers http.Header) {
 		defer server.Close()
 		defer func() {
 			if f := recover(); f != nil {
-				fmt.Printf("panic %v\n", f)
+				log.Printf("panic %v\n", f)
 			}
 		}()
 		for {
