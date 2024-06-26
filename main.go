@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	// 解析命令行参数（gproxy [-p port] [-m mode] domain）
+	// 解析命令行参数（gproxy [-p port] [-m mode][--anonymous][--realip realip][--useragent useragent] domain）
 	args := os.Args[1:]
 	if len(args) < 1 {
 		panic("invalid args")
@@ -40,6 +40,21 @@ func main() {
 		}
 		if arg == "--cert" && len(args) > i+1 {
 			cert = args[i+1]
+			i++
+			continue
+		}
+		if arg == "--anonymous" {
+			proxy.Anonymous = true
+			i++
+			continue
+		}
+		if arg == "--realip" && len(args) > i+1 {
+			proxy.RealIP = args[i+1]
+			i++
+			continue
+		}
+		if arg == "--useragent" && len(args) > i+1 {
+			proxy.UserAgent = args[i+1]
 			i++
 			continue
 		}

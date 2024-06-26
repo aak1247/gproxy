@@ -31,6 +31,13 @@ func httpProxy(url string) func(c *gin.Context) {
 		}
 		// 覆盖请求头
 		headers["Host"] = GetDomain(url)
+		if Anonymous {
+			// 删除请求源信息
+			headers["X-Real-Ip"] = RealIP
+			headers["X-Forwarded-For"] = RealIP
+			headers["User-Agent"] = UserAgent
+			delete(headers, "Referer")
+		}
 		// 读取请求体
 		body, _ := c.GetRawData()
 		// 发送请求
