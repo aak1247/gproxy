@@ -2,6 +2,7 @@ package proxy
 
 import (
 	ws2 "github.com/gorilla/websocket"
+	"gproxy/auth"
 	"log"
 	"net/http"
 	"strconv"
@@ -30,6 +31,11 @@ func wsProxyUrl(url string) func(http.ResponseWriter, *http.Request) {
 			conn := initWSConn(writer, request)
 			// 拿到所有的header和参数
 			header := request.Header
+			if !auth.IsHTTPAuthorized(request) {
+				log.Printf("unauthorized request to %s\n", request.URL)
+				writer.WriteHeader(http.StatusUnauthorized)
+				return
+			}
 			// 覆盖请求头
 			header["Host"] = []string{GetDomain(url)}
 			if Anonymous {
