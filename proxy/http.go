@@ -2,11 +2,15 @@ package proxy
 
 import (
 	"bytes"
+	"crypto/tls"
 	"github.com/gin-gonic/gin"
+	"gproxy/auth"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // NewHttpProxy 启动代理服务
@@ -26,10 +30,18 @@ func httpProxy(url string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		// 读取请求头
 		headers := make(map[string]string)
+		if !auth.IsHTTPAuthorized(c.Request) {
+			log.Printf("unauthorized request to %s\n", c.Request.URL)
+			c.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		for k, v := range c.Request.Header {
 			headers[k] = v[0]
 		}
 		// 覆盖请求头
+		nativeHost := headers["Host"]
+		nativeOrigin := headers["Origin"]
+		nativeReferer := headers["Referer"]
 		headers["Host"] = GetDomain(url)
 		if Anonymous {
 			// 删除请求源信息
@@ -37,6 +49,8 @@ func httpProxy(url string) func(c *gin.Context) {
 			headers["X-Forwarded-For"] = RealIP
 			headers["User-Agent"] = UserAgent
 			delete(headers, "Referer")
+			// Origin
+			headers["Origin"] = GetOrigin(url)
 		}
 		// 读取请求体
 		body, _ := c.GetRawData()
@@ -50,6 +64,12 @@ func httpProxy(url string) func(c *gin.Context) {
 			// 设置响应头
 			for k, v := range resp.Header {
 				c.Header(k, v[0])
+			}
+			if Anonymous {
+				// 设置回Origin和Referer
+				c.Header("Origin", nativeOrigin)
+				c.Header("Referer", nativeReferer)
+				c.Header("Host", nativeHost)
 			}
 			// 设置响应码
 			c.Status(resp.StatusCode)
@@ -72,9 +92,22 @@ func httpProxy(url string) func(c *gin.Context) {
 	}
 }
 
-func SendRequest(method string, url string, headers map[string]string, body []byte) (*http.Response, error) {
+func SendRequest(method string, targetUrl string, headers map[string]string, body []byte) (*http.Response, error) {
+	client := http.DefaultClient
+	// 设置代理
+	if ProxyPass != "" {
+		proxy, _ := url.Parse(ProxyPass)
+		tr := &http.Transport{
+			Proxy:           http.ProxyURL(proxy),
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client = &http.Client{
+			Transport: tr,
+			Timeout:   time.Second * 5, //超时时间
+		}
+	}
 	// 创建请求
-	req, err := http.NewRequest(method, url, bytes.NewReader(body))
+	req, err := http.NewRequest(method, targetUrl, bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -83,9 +116,9 @@ func SendRequest(method string, url string, headers map[string]string, body []by
 		req.Header.Set(k, v)
 	}
 	log.Println(req.Header)
-	log.Println(url)
+	log.Println(targetUrl)
 	// 发送请求
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -97,4 +130,11 @@ func GetDomain(url string) string {
 	v1 := strings.Split(url, "//")[1]
 	v2 := strings.Split(v1, "/")[0]
 	return v2
+}
+
+func GetOrigin(url string) string {
+	// 从url中获取完整域名
+	s := strings.Split(url, "//")
+	v2 := strings.Split(s[1], "/")[0]
+	return s[0] + "//" + v2
 }
