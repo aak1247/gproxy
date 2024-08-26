@@ -2,6 +2,18 @@
 
 | English | [简体中文](./README.zh-CN.md) |
 
+## Install
+
+### With go
+
+```bash
+go install github.com/aak1247/gproxy
+```
+
+### Binary
+
+See [Releases](https://github.com/aak1247/gproxy/releases/)
+
 ## Usage
 
 ### Arguments
