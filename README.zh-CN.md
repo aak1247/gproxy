@@ -9,9 +9,22 @@
 - [x] TCP代理
 - [x] Websocket代理
 - [ ] HTTP/HTTPS批量代理
-- [ ] 支持通过代理进行代理（比如科学）
+- [x] 支持通过代理进行代理（比如科学）
 - [ ] 白名单IP支持
 - [x] 简单Token认证
+
+## 安装
+
+### With go
+
+```bash
+go install github.com/aak1247/gproxy@latest
+```
+
+### Binary
+
+见 [Releases](https://github.com/aak1247/gproxy/releases/)
+
 
 ## 使用
 

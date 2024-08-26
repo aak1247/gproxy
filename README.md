@@ -7,7 +7,7 @@
 ### With go
 
 ```bash
-go install github.com/aak1247/gproxy
+go install github.com/aak1247/gproxy@latest
 ```
 
 ### Binary
