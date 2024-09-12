@@ -1,10 +1,12 @@
 package proxy
 
 import (
+	"golang.org/x/net/proxy"
 	"io"
 	"log"
 	"net"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -29,7 +31,19 @@ func tcpProxy(url string, client net.Conn) error {
 	ss := make(chan bool)
 
 	// 连接远程服务器
-	server, err := net.Dial("tcp", url)
+	var server net.Conn
+	var err error
+	if ProxyPass == "" {
+		server, err = net.Dial("tcp", url)
+	} else {
+		var dialer proxy.Dialer
+		nativeUrl := strings.Split(ProxyPass, "//")[1]
+		dialer, err = proxy.SOCKS5("tcp", nativeUrl, nil, proxy.Direct)
+		if err != nil {
+			return err
+		}
+		server, err = dialer.Dial("tcp", url)
+	}
 	if err != nil {
 		log.Printf("dial error %v\n", err)
 		return err
@@ -103,9 +117,9 @@ func tcpProxy(url string, client net.Conn) error {
 
 					// write to WSClient
 					if n, err := client.Write(buf); err != nil {
-						log.Println("Failed to write to WSClient:", err)
+						log.Println("Failed to write to TCP Client:", err)
 					} else {
-						log.Printf("write to WSClient %d", n)
+						log.Printf("write to TCP Client %d", n)
 					}
 					// 清空缓冲区
 					buf = make([]byte, 1024*256)

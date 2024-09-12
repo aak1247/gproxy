@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// 解析命令行参数（gproxy [-p port] [-m mode][--anonymous][--realip realip][--useragent useragent] domain）
+	// 解析命令行参数（gproxy [-p port] [-m mode][--proxy proxypass][--anonymous][--realip realip][--useragent useragent] domain）
 	args := os.Args[1:]
 	domain := ""
 	var err error
@@ -74,8 +74,8 @@ func main() {
 	if domain == "" {
 		log.Fatal("domain is required")
 	}
-	// 仅http/https支持代理
-	if (mode != "http" && mode != "https") && proxy.ProxyPass != "" {
+	// 仅http/https/tcp支持代理
+	if (mode != "http" && mode != "https" && mode != "tcp") && proxy.ProxyPass != "" {
 		log.Fatalf("proxy is only supported for http/https")
 		return
 	}
